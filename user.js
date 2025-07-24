@@ -3,7 +3,7 @@
 // @namespace    https://github.com/KingBeiLiYa/GeoFS-AI-ATC-Test-Version
 // @version      0.1
 // @description  shortcut key is T/快捷键为T
-// @author       zm
+// @author       贝利亚大王
 // @match        https://www.geo-fs.com/geofs.php?v=3.9
 // @grant        none
 // ==/UserScript==
