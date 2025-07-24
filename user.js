@@ -1,11 +1,10 @@
 // ==UserScript==
 // @name         GeoFS AI ATC
-// @namespace    https://github.com/bilizm/GeoFS-AI-ATC
+// @namespace    https://github.com/KingBeiLiYa/GeoFS-AI-ATC-Test-Version
 // @version      0.1
 // @description  shortcut key is T/快捷键为T
 // @author       zm
 // @match        https://www.geo-fs.com/geofs.php?v=3.9
-// @icon         https://www.google.com/s2/favicons?sz=64&domain=geo-fs.com
 // @grant        none
 // ==/UserScript==
 
