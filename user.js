@@ -5,7 +5,7 @@
 // @description  shortcut key is T/快捷键为T
 // @author       贝利亚大王
 // @match        https://www.geo-fs.com/geofs.php?v=3.9
-// @grant        none
+// @grant        nothing
 // ==/UserScript==
 
 (function () {
