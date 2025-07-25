@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         GeoFS AI ATC
-// @namespace    https://github.com/KingBeiLiYa/GeoFS-AI-ATC-Test-Version
+// @namespace    https://github.com/KingBeiLiYa/GeoFS-ATC-Test-Version
 // @version      0.1
 // @description  shortcut key is T/快捷键为T
 // @author       贝利亚大王
