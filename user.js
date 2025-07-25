@@ -1,17 +1,15 @@
 // ==UserScript==
-// @name         GeoFS AI ATC
+// @name         GeoFS ATC 
 // @namespace    https://github.com/KingBeiLiYa/GeoFS-AI-ATC-Test-Version
 // @version      0.1
-// @description  shortcut key is T/快捷键为T
+// @description  click T to open
 // @author       贝利亚大王
-// @match        https://www.geo-fs.com/geofs.php?v=3.9
+// @match        https://www.geo-fs.com/geofs.php*
 // @grant        none
 // ==/UserScript==
 
 (function () {
-    'use strict';
-
-    // 语言包
+    // ====== 语言包及全局变量 ======
     const LANGS = {
         zh: {
             name: "简体中文",
@@ -233,15 +231,14 @@
             tutorial_text: "【GeoFS AI ATC Plugin Tutorial】\n\n1. Fill in callsign, departure/arrival airport, route points, flight plan (route/plan optional).\n2. You can use dropdown to select common instructions.\n3. Supports commands like 'request taxi', 'request takeoff', 'report position'.\n4. Supports multiple airports (alternate), route points, flight plan parsing.\n5. Supports voice broadcast and export history for review.\n6. Beginner/Advanced mode switchable.\n\nRecommended process: Taxi → Line up → Takeoff → Departure → Cruise → Arrival → Landing → Runway exit.\n\nFor custom commands, enter text then click 'Add'."
         }
     };
-
-    let currentLang = "zh";
+    let currentLang = localStorage.getItem("atcLang") || "zh";
     let callsign = "";
     let depICAO = "";
     let arrICAO = "";
     let alternates = [];
     let routePoints = [];
     let flightPlan = "";
-    let manualState = null;
+    window.__geofs_ATC_manualState = null;
     let focusInput = false;
     let currentPhase = 0;
     let mode = localStorage.getItem("atcMode") || "beginner";
@@ -249,13 +246,12 @@
     let history = JSON.parse(localStorage.getItem("atcHistory") || "[]");
 
     function isOnGround() {
-        if (manualState !== null) return manualState;
+        if (window.__geofs_ATC_manualState !== null) return window.__geofs_ATC_manualState;
         let vals = geofs.animation?.values || {};
         let alt = vals.altitude || geofs.aircraft?.instance?.altitude || 0;
         let ground = vals.groundElevation || 0;
         return Math.abs(alt - ground) < 15;
     }
-
     function getFlightStatus() {
         let vals = geofs.animation?.values || {};
         let alt = Math.round(vals.altitude || geofs.aircraft?.instance?.altitude || 0);
@@ -264,7 +260,7 @@
         let heading = Math.round(vals.heading || geofs.aircraft?.instance?.heading || 0);
         let vs = Math.round(vals.verticalSpeed || 0);
         let relAlt = alt - ground;
-        let onGround = manualState !== null ? manualState : relAlt < 15;
+        let onGround = window.__geofs_ATC_manualState !== null ? window.__geofs_ATC_manualState : relAlt < 15;
         return { altitude: alt, relAlt, speed, heading, vs, onGround };
     }
 
@@ -292,6 +288,7 @@
     }
 
     function openATCPanel() {
+        if (document.getElementById("ai-atc-panel")) return;
         const lang = LANGS[currentLang];
         let panel = document.createElement("div");
         panel.id = "ai-atc-panel";
@@ -375,6 +372,7 @@
         document.getElementById("lang-select").value = currentLang;
         document.getElementById("lang-select").onchange = function () {
             currentLang = this.value;
+            localStorage.setItem("atcLang", currentLang);
             panel.remove();
             openATCPanel();
         };
@@ -392,17 +390,16 @@
         document.getElementById("alternate-input").onchange = function () { alternates = this.value.split(",").map(x => x.trim().toUpperCase()).filter(Boolean); };
         document.getElementById("route-input").onchange = function () { routePoints = this.value.split(",").map(x => x.trim().toUpperCase()).filter(Boolean); };
         document.getElementById("plan-input").onchange = function () { flightPlan = this.value.trim(); };
-        document.getElementById("atc-close").onclick = function () { panel.remove(); manualState = null; };
+        document.getElementById("atc-close").onclick = function () { panel.remove(); window.__geofs_ATC_manualState = null; focusInput = false; };
         document.getElementById("export-history").onclick = exportHistory;
         document.getElementById("tutorial-btn").onclick = function () { alert(lang.tutorial_text); };
 
         // 状态按钮
         const stateInfo = document.getElementById("manual-state-info");
-        document.getElementById("btn-ground").onclick = function () { manualState = true; stateInfo.textContent = lang.ground_set; stateInfo.style.color = "#6bff6b"; };
-        document.getElementById("btn-airborne").onclick = function () { manualState = false; stateInfo.textContent = lang.airborne_set; stateInfo.style.color = "#ff6b6b"; };
-        document.getElementById("btn-auto").onclick = function () { manualState = null; stateInfo.textContent = lang.auto_set; stateInfo.style.color = "#ffd700"; };
+        document.getElementById("btn-ground").onclick = function () { window.__geofs_ATC_manualState = true; stateInfo.textContent = lang.ground_set; stateInfo.style.color = "#6bff6b"; };
+        document.getElementById("btn-airborne").onclick = function () { window.__geofs_ATC_manualState = false; stateInfo.textContent = lang.airborne_set; stateInfo.style.color = "#ff6b6b"; };
+        document.getElementById("btn-auto").onclick = function () { window.__geofs_ATC_manualState = null; stateInfo.textContent = lang.auto_set; stateInfo.style.color = "#ffd700"; };
 
-        // 常用/自定义指令按钮和下拉
         document.getElementById("add-cmd-btn").onclick = function () {
             let val = document.getElementById("add-cmd").value.trim();
             if (val) {
@@ -412,14 +409,11 @@
                 openATCPanel();
             }
         };
-
         document.getElementById("instruction-select").onchange = function () {
             let val = this.value;
             if (!val) return;
             document.getElementById("atc-input").value = val;
         };
-
-        // 指令输入和发送
         logATC(lang.welcome);
         let atcInput = document.getElementById("atc-input");
         atcInput.focus();
@@ -452,6 +446,7 @@
         updateStatus();
         panel.addEventListener("remove", () => clearInterval(timer));
     }
+    window.openATCPanel = openATCPanel;
 
     function logATC(msg) {
         let log = document.getElementById("atc-log");
@@ -469,13 +464,11 @@
         let a = document.createElement("a");
         a.href = url; a.download = "atc_history.txt"; a.click();
     }
-
     function speakATC(text) {
         if (!window.speechSynthesis) return;
         let msg = new window.SpeechSynthesisUtterance(text);
         window.speechSynthesis.speak(msg);
     }
-
     async function aiATC(cmd, lang) {
         cmd = cmd.toLowerCase();
         if (!/^[a-z]{4}$/i.test(depICAO) || !/^[a-z]{4}$/i.test(arrICAO)) {
@@ -483,27 +476,17 @@
         }
         let useCallsign = callsign || "";
         let reply = "";
-        if (cmd.includes("滑行") || cmd.includes("taxi")) {
-            currentPhase = 1; reply = (lang === LANGS.zht ? "許可滑行至跑道。" : (lang === LANGS.en ? "Cleared to taxi to runway." : "允许滑行至跑道。"));
-        }
-        if (cmd.includes("推出") || cmd.includes("pushback")) {
-            currentPhase = 0; reply = (lang === LANGS.zht ? "許可推出。" : (lang === LANGS.en ? "Pushback approved." : "允许推出。"));
-        }
-        if (cmd.includes("起飞") || cmd.includes("takeoff")) {
+        if (cmd.includes("滑行") || cmd.includes("taxi")) currentPhase = 1, reply = (lang === LANGS.zht ? "許可滑行至跑道。" : (lang === LANGS.en ? "Cleared to taxi to runway." : "允许滑行至跑道。"));
+        if (cmd.includes("推出") || cmd.includes("pushback")) currentPhase = 0, reply = (lang === LANGS.zht ? "許可推出。" : (lang === LANGS.en ? "Pushback approved." : "允许推出。"));
+        if (cmd.includes("起飞") || cmd.includes("起飛") || cmd.includes("takeoff")) {
             currentPhase = 2;
-            if (isOnGround()) reply = lang.takeoff(useCallsign, depICAO);
-            else reply = lang.airborne(useCallsign);
+            reply = isOnGround() ? lang.takeoff(useCallsign, depICAO) : lang.airborne(useCallsign);
         }
-        if (cmd.includes("进入跑道") || cmd.includes("進入跑道") || cmd.includes("line up")) {
-            currentPhase = 1; reply = (lang === LANGS.zht ? "許可進入跑道。" : (lang === LANGS.en ? "Cleared to line up on runway." : "允许进入跑道。"));
-        }
-        if (cmd.includes("离场") || cmd.includes("離場") || cmd.includes("departure")) {
-            currentPhase = 3; reply = (lang === LANGS.zht ? "許可離場，呼叫雷達。" : (lang === LANGS.en ? "Cleared for departure, contact radar." : "允许离场，呼叫雷达。"));
-        }
-        if (cmd.includes("降落") || cmd.includes("降落") || cmd.includes("landing")) {
+        if (cmd.includes("进入跑道") || cmd.includes("進入跑道") || cmd.includes("line up")) currentPhase = 1, reply = (lang === LANGS.zht ? "許可進入跑道。" : (lang === LANGS.en ? "Cleared to line up on runway." : "允许进入跑道。"));
+        if (cmd.includes("离场") || cmd.includes("離場") || cmd.includes("departure")) currentPhase = 3, reply = (lang === LANGS.zht ? "許可離場，呼叫雷達。" : (lang === LANGS.en ? "Cleared for departure, contact radar." : "允许离场，呼叫雷达。"));
+        if (cmd.includes("降落") || cmd.includes("landing")) {
             currentPhase = 6;
-            if (!isOnGround()) reply = lang.landing(useCallsign, arrICAO);
-            else reply = lang.on_ground(useCallsign);
+            reply = !isOnGround() ? lang.landing(useCallsign, arrICAO) : lang.on_ground(useCallsign);
         }
         let altMatch = cmd.match(/(高度|altitude)[^\d]*(\d{3,5})/);
         let climbMatch = cmd.match(/(爬升|climb)[^\d]*(\d{3,5})/);
@@ -529,24 +512,17 @@
             let s = getFlightStatus();
             reply = lang.report(s.altitude, s.speed, s.heading, s.vs, s.onGround);
         }
-        if (cmd.includes("备降") || cmd.includes("備降") || cmd.includes("alternate")) {
-            reply += ` ${lang.alt_label}：${alternates.join(", ")}`;
-        }
-        if (cmd.includes("航路") || cmd.includes("route")) {
-            reply += ` ${lang.route_label.replace('(选填)','').replace('(optional)','').replace('(選填)','')}：${routePoints.join(", ")}`;
-        }
-        if (cmd.includes("计划") || cmd.includes("計劃") || cmd.includes("plan")) {
-            reply += ` ${lang.plan_label.replace('(选填)','').replace('(optional)','').replace('(選填)','')}：${flightPlan}`;
-        }
+        if (cmd.includes("备降") || cmd.includes("備降") || cmd.includes("alternate")) reply += ` ${lang.alt_label}：${alternates.join(", ")}`;
+        if (cmd.includes("航路") || cmd.includes("route")) reply += ` ${lang.route_label.replace('(选填)','').replace('(optional)','').replace('(選填)','')}：${routePoints.join(", ")}`;
+        if (cmd.includes("计划") || cmd.includes("計劃") || cmd.includes("plan")) reply += ` ${lang.plan_label.replace('(选填)','').replace('(optional)','').replace('(選填)','')}：${flightPlan}`;
         if (cmd.includes("再见") || cmd.includes("bye") || cmd.includes("退出") || cmd.includes("exit")) {
             document.getElementById("ai-atc-panel")?.remove();
-            manualState = null;
+            window.__geofs_ATC_manualState = null;
             reply = lang.bye;
         }
         if (!reply) reply = lang.not_recognized;
         return reply;
     }
-
     async function sendATCCommand() {
         let input = document.getElementById("atc-input");
         if (!input || !input.value.trim()) return;
@@ -559,18 +535,48 @@
         speakATC(reply);
     }
 
+    // 插件按钮插入优化
+    function insertATCButton() {
+        let oldBtn = document.getElementById('geofs-atc-toolbar-btn');
+        if (oldBtn) oldBtn.remove();
+        let btn = document.createElement('button');
+        btn.className = "mdl-button mdl-js-button geofs-f-standard-ui geofs-mediumScreenOnly";
+        btn.id = "geofs-atc-toolbar-btn";
+        btn.textContent = "ATC";
+        btn.style.marginLeft = "8px";
+        btn.style.fontWeight = "bold";
+        btn.onclick = function () {
+            if (!window.openATCPanel) return alert("openATCPanel未定义！");
+            window.openATCPanel();
+        };
+        function doInsert() {
+            let bar = document.querySelector(".geofs-ui-bottom");
+            if (bar) {
+                bar.appendChild(btn);
+            } else {
+                setTimeout(doInsert, 1000);
+            }
+        }
+        doInsert();
+    }
+
+    // 页面加载完成后插入按钮和绑定事件
+    window.addEventListener('load', insertATCButton);
+    setTimeout(insertATCButton, 2000);
+    setInterval(insertATCButton, 8000);
+
+    // 键盘事件：T键只负责打开
     document.addEventListener("keydown", function (e) {
-        if (focusInput) return;
+        if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
         if (e.key.toLowerCase() === "t" && !document.getElementById("ai-atc-panel")) {
-            openATCPanel();
+            if (!window.openATCPanel) return alert("openATCPanel未定义！");
+            window.openATCPanel();
         }
         if (document.getElementById("ai-atc-panel") && e.ctrlKey && e.key.toLowerCase() === "w") {
             document.getElementById("ai-atc-panel").remove();
-            manualState = null;
+            window.__geofs_ATC_manualState = null;
+            focusInput = false;
         }
-    });
+    }, true);
 
-    setInterval(() => { }, 1000);
-
-    //禁止盗用!!!
 })();
