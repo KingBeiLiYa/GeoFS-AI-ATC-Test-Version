@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoFS AI ATC
 // @namespace    https://github.com/KingBeiLiYa/GeoFS-ATC-Test-Version
-// @version      0.1
+// @version      0.1.1
 // @description  shortcut key is T/快捷键为T
 // @author       贝利亚大王
 // @match        https://www.geo-fs.com/geofs.php?v=3.9
@@ -525,10 +525,14 @@
             }
         };
 
+        // 修复：选择常用指令时插入当前语言 label
         document.getElementById("instruction-select").onchange = function () {
-            let val = this.value;
-            if (!val) return;
-            document.getElementById("atc-input").value = val;
+            let select = this;
+            let idx = select.selectedIndex;
+            if (idx <= 0) return;
+            let selectedOption = select.options[idx];
+            let label = selectedOption.text;
+            document.getElementById("atc-input").value = label;
         };
 
         // 指令输入和发送
