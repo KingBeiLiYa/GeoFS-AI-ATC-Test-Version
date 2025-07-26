@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GeoFS AI ATC
 // @namespace    https://github.com/KingBeiLiYa/GeoFS-ATC-Test-Version
-// @version      0.1.1
+// @version      0.1.2
 // @description  shortcut key is T/快捷键为T
 // @author       贝利亚大王
 // @match        https://www.geo-fs.com/geofs.php?v=3.9
@@ -249,6 +249,9 @@
     let customCmds = JSON.parse(localStorage.getItem("myATCcmds") || "[]");
     let history = JSON.parse(localStorage.getItem("atcHistory") || "[]");
 
+    // 语音音量，默认1.0，可调节
+    let speechVolume = parseFloat(localStorage.getItem("atcSpeechVolume") || "1.0");
+
     // --- ATC面板管理 ---
     let atcPanelOpen = false;
     let atcPanel = null;
@@ -312,8 +315,20 @@
     }
 
     function speakATC(text) {
-        if (!window.speechSynthesis) return;
+        if (!window.speechSynthesis || speechVolume === 0) return;
+        let langCode;
+        if (currentLang === "zh") langCode = "zh-CN";
+        else if (currentLang === "zht") langCode = "zh-TW";
+        else langCode = "en-US";
         let msg = new window.SpeechSynthesisUtterance(text);
+        msg.volume = speechVolume;
+        msg.lang = langCode;
+        // 尝试选择合适voice
+        let voices = window.speechSynthesis.getVoices();
+        if (voices && voices.length) {
+            let match = voices.find(v => v.lang === langCode);
+            if (match) msg.voice = match;
+        }
         window.speechSynthesis.speak(msg);
     }
 
@@ -476,6 +491,10 @@
                 <button id="atc-close" style="float:right;background:#e23;color:#fff;border:none;padding:2px 14px;border-radius:8px;font-size:16px;margin-left:8px;">${lang.close}</button>
                 <button id="export-history" style="float:right;background:#09f;color:#fff;border:none;padding:2px 14px;border-radius:8px;font-size:16px;margin-left:8px;">${lang.export_history}</button>
                 <button id="tutorial-btn" style="float:left;background:#ffd700;color:#333;border:none;padding:2px 12px;border-radius:8px;font-size:15px;">${lang.tutorial}</button>
+                <label style="float:left;margin-left:10px;margin-top:2px;font-size:15px;color:#ffd700;">🔊
+                    <input id="speech-volume" type="range" min="0" max="1" step="0.01" value="${speechVolume}" style="width:70px;vertical-align:middle;">
+                    <span id="speech-volume-val">${Math.round(speechVolume*100)}</span>%
+                </label>
             </div>
         `;
         document.body.appendChild(panel);
@@ -507,6 +526,13 @@
         document.getElementById("atc-close").onclick = function () { closeATCPanel(); };
         document.getElementById("export-history").onclick = exportHistory;
         document.getElementById("tutorial-btn").onclick = function () { alert(lang.tutorial_text); };
+
+        // 语音音量调节
+        document.getElementById("speech-volume").oninput = function () {
+            speechVolume = parseFloat(this.value);
+            localStorage.setItem("atcSpeechVolume", speechVolume);
+            document.getElementById("speech-volume-val").textContent = Math.round(speechVolume*100);
+        };
 
         // 状态按钮
         const stateInfo = document.getElementById("manual-state-info");
