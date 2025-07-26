@@ -1,38 +1,67 @@
-## GeoFS ATC Add-on
+**## GeoFS ATC Add-on **
 
 
 
-<img width="700" height="736" alt="image" src="https://github.com/user-attachments/assets/07238b85-75aa-4cff-a93f-df3ed017dda5" />
+<img width="717" height="792" alt="image" src="https://github.com/user-attachments/assets/bb7d7a33-9c75-4374-ad8f-d7632c6ba4b4" />
 
 
 
 
-GeoFS AI ATC is a browser extension (userscript) that brings intelligent Air Traffic Control to the GeoFS flight simulator. It supports multiple languages (Simplified Chinese, Traditional Chinese, English), interactive ATC workflow guidance, voice readback, custom command templates, advanced and beginner modes, and full ATC history export for flight debriefing.
+## Features
 
-**Key Features:**
+**1. ATC Panel with Flight Info Input**  
+- The plugin provides a convenient ATC control panel where you can enter your aircraft callsign, departure and arrival airports, alternate airports, route points, and flight plan.
+- All information is used to generate context-aware ATC replies, making the experience authentic.
 
-- **Multi-language Support:** Simplified Chinese, Traditional Chinese, and English, with all UI and tutorial texts adapting to your chosen language.
-- **Drag-and-drop UI:** Easily reposition the ATC panel anywhere on your screen.
-- **Real ATC Workflow Guidance:** Step-by-step ATC flow, with suggested commands at each stage (taxi, line up, takeoff, departure, cruise, arrival, landing, runway exit).
-- **Command Templates:** Quick-select common ATC instructions via dropdown, plus add your own custom templates for frequently used commands.
-- **Flexible Flight Input:** Enter multiple airports (including alternates), route points, and an optional flight plan; ATC will parse and respond accordingly.
-- **Manual State Override:** Set aircraft status (ground/airborne/auto) for precise ATC logic.
-- **Voice Broadcast:** ATC responses are read aloud using browser SpeechSynthesis for enhanced realism.
-- **History & Review:** All ATC conversations are logged and can be exported for post-flight briefings.
-- **Beginner/Advanced Modes:** Tailor the UI and available commands to your experience level.
-- **On-demand Tutorial:** Access an interactive guide at any time, with content that adapts to your selected language.
+**2. Multi-language Support**  
+- Supports three languages: English, Simplified Chinese, and Traditional Chinese.
+- You can switch the language at any time from the panel, and all commands and replies will be shown and spoken in your selected language.
 
-**How to Use:**
+**3. AI-generated ATC Replies**  
+- Type standard ATC commands (e.g., “request taxi”, “request takeoff”, “report position”) or select them from a dropdown menu.
+- The AI automatically interprets your input and responds with context-aware, realistic ATC instructions.
 
-1. Press **T** in GeoFS to open the ATC panel.
-2. Fill in your flight details (callsign, departure/arrival airport, alternates, route, flight plan).
-3. Select common instructions from the dropdown or enter custom ATC commands.
-4. Review ATC history, export logs, or open the tutorial for help.
+**4. Common and Custom Commands**  
+- A dropdown menu lists common ATC commands for quick access.
+- You can add your own custom commands, which will be saved locally and remain available for future sessions.
 
->Please report any bugs.
+**5. Command History and Export**  
+- Every ATC conversation is logged in the panel.
+- You can export your ATC history to a text file for review or replay.
 
-> For real-world operations, always refer to official ATC procedures.
+**6. Live Flight Status Display**  
+- The panel shows real-time flight data: altitude, speed, heading, vertical speed, and whether you are airborne or on the ground.
+- Data is updated automatically every second.
 
----
-**Ps:** Perhaps there are some bugs.
+**7. Voice Broadcast with Adjustable Volume**  
+- ATC replies are spoken aloud using browser text-to-speech (TTS).
+- The volume slider lets you set the broadcast volume from 0% (mute) to 100% (max).
+- Voice language matches the selected UI language.
 
+**8. Easy Access and Draggable UI**  
+- Open/close the ATC panel from the GeoFS toolbar button or by pressing the “T” key.
+- The panel is fully draggable; move it anywhere on your screen.
+
+**9. Beginner/Advanced Modes**  
+- Choose between Beginner (fewer, most common commands) or Advanced (full command set) modes.
+- Modes are switchable anytime for a personalized experience.
+
+**10. Manual and Automatic Aircraft State Detection**  
+- Set your aircraft as “Ground”, “Airborne”, or let the plugin detect it automatically.
+- Useful for troubleshooting or custom scenarios.
+
+**11. Tutorial and Help**  
+- Includes an in-panel tutorial explaining all features and recommended ATC procedures.
+
+## How to Use
+
+1. Open the ATC panel from the toolbar or with the “T” key.
+2. Fill in your flight info (callsign, airports, route, etc.).
+3. Select or type an ATC command. Press Enter or click “Send”.
+4. View the reply and hear it spoken aloud (adjust volume as needed).
+5. Add custom commands or export your conversation history anytime.
+6. Switch language or mode to fit your needs.
+
+
+
+Bring smarter, more immersive ATC to your GeoFS flights!
