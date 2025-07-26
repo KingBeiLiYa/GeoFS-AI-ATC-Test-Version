@@ -1,18 +1,18 @@
 name: Discord Commit Notifier
-on: [push]  # 当代码被推送时触发
+on: [push]  # 当代码被推送时触发（原文件误写为"阻塞"）
 
 jobs:
   notify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest  # 原文件拼写错误："rune-on"
     steps:
       - name: Send to Discord
-        uses: khanhas/sponsorblock-discord-webhook@v1
+        uses: khanhas/sponsorblock-discord-webhook@v1  # 原URL有误
         with:
-          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}  # 引用刚才存的 Secret
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}  # 原Secret名称和变量语法错误
           title: "[${{ github.repository }}:${{ github.ref_name }}] ${{ github.event.commits.size }} new commit(s)"
           description: |
             **Latest Commit:**  
             ${{ github.event.commits[0].message }}  
             **Hash:** `${{ github.sha }}`  
             **Author:** ${{ github.event.commits[0].author.name }}
-          color: "0x7289DA"  # Discord 主题色
+          color: "0x7289DA"  # Discord主题色（原值错误）
