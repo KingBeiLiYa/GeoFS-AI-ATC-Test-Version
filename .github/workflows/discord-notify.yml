@@ -1,0 +1,18 @@
+name: Discord Commit Notifier
+on: [push]  # 当代码被推送时触发
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send to Discord
+        uses: khanhas/sponsorblock-discord-webhook@v1
+        with:
+          webhook_url: ${{ secrets.DISCORD_WEBHOOK_URL }}  # 引用刚才存的 Secret
+          title: "[${{ github.repository }}:${{ github.ref_name }}] ${{ github.event.commits.size }} new commit(s)"
+          description: |
+            **Latest Commit:**  
+            ${{ github.event.commits[0].message }}  
+            **Hash:** `${{ github.sha }}`  
+            **Author:** ${{ github.event.commits[0].author.name }}
+          color: "0x7289DA"  # Discord 主题色
