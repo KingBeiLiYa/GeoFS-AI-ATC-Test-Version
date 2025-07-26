@@ -64,4 +64,4 @@
 
 
 
-Bring smarter, more immersive ATC to your GeoFS flights!
+Thanks for using ! Have a nice flight !
