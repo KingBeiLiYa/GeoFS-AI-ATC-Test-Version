@@ -64,4 +64,4 @@
 
 
 
-Thanks for using! Have a nice flight !
+Thanks for using! Have a nice flight!
